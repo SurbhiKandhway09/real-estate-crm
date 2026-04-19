@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import {
+  ResponsiveContainer,
   BarChart,
   Bar,
   XAxis,
@@ -26,6 +27,7 @@ function Dashboard() {
   }, []);
 
   // 🎯 counts
+  const total = leads.length;
   const newCount = leads.filter(l => l.status === "New").length;
   const contactedCount = leads.filter(l => l.status === "Contacted").length;
   const closedCount = leads.filter(l => l.status === "Closed").length;
@@ -44,6 +46,9 @@ function Dashboard() {
       {/* Cards */}
       <div className="row mb-4">
         <div className="col">
+          <div className="card p-3 text-center">Total: {total}</div>
+        </div>
+        <div className="col">
           <div className="card p-3 text-center">New: {newCount}</div>
         </div>
         <div className="col">
@@ -54,14 +59,16 @@ function Dashboard() {
         </div>
       </div>
 
-      {/* 📊 Chart */}
-      <BarChart width={500} height={300} data={data}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="name" />
-        <YAxis />
-        <Tooltip />
-        <Bar dataKey="value" />
-      </BarChart>
+      {/* 📊 Responsive Chart */}
+      <ResponsiveContainer width="100%" height={300}>
+        <BarChart data={data} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="name" />
+          <YAxis allowDecimals={false} />
+          <Tooltip />
+          <Bar dataKey="value" minPointSize={5} />
+        </BarChart>
+      </ResponsiveContainer>
     </div>
   );
 }
