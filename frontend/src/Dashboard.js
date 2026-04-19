@@ -1,24 +1,23 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Bar } from "react-chartjs-2";
 import {
-  Chart as ChartJS,
-  BarElement,
-  CategoryScale,
-  LinearScale
-} from "chart.js";
-
-ChartJS.register(BarElement, CategoryScale, LinearScale);
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid
+} from "recharts";
 
 function Dashboard() {
   const [leads, setLeads] = useState([]);
-
   const token = localStorage.getItem("token");
 
   const fetchLeads = async () => {
-    const res = await axios.get("https://real-estate-crm-backend-1onm.onrender.com/api/leads", {
-      headers: { Authorization: token }
-    });
+    const res = await axios.get(
+      "https://real-estate-crm-backend-1onm.onrender.com/api/leads",
+      { headers: { Authorization: token } }
+    );
     setLeads(res.data);
   };
 
@@ -26,42 +25,43 @@ function Dashboard() {
     fetchLeads();
   }, []);
 
-  // 📊 Stats
-  const total = leads.length;
-  const newLeads = leads.filter(l => l.status === "New").length;
-  const contacted = leads.filter(l => l.status === "Contacted").length;
-  const closed = leads.filter(l => l.status === "Closed").length;
+  // 🎯 counts
+  const newCount = leads.filter(l => l.status === "New").length;
+  const contactedCount = leads.filter(l => l.status === "Contacted").length;
+  const closedCount = leads.filter(l => l.status === "Closed").length;
 
-  const data = {
-    labels: ["New", "Contacted", "Closed"],
-    datasets: [
-      {
-        label: "Leads",
-        data: [newLeads, contacted, closed]
-      }
-    ]
-  };
+  // 📊 chart data
+  const data = [
+    { name: "New", value: newCount },
+    { name: "Contacted", value: contactedCount },
+    { name: "Closed", value: closedCount }
+  ];
 
   return (
-    <div className="container mt-4">
-      <h2>📊 Dashboard</h2>
+    <div>
+      <h2 className="mb-4">📊 Dashboard</h2>
 
+      {/* Cards */}
       <div className="row mb-4">
         <div className="col">
-          <div className="card p-3">Total Leads: {total}</div>
+          <div className="card p-3 text-center">New: {newCount}</div>
         </div>
         <div className="col">
-          <div className="card p-3">New: {newLeads}</div>
+          <div className="card p-3 text-center">Contacted: {contactedCount}</div>
         </div>
         <div className="col">
-          <div className="card p-3">Contacted: {contacted}</div>
-        </div>
-        <div className="col">
-          <div className="card p-3">Closed: {closed}</div>
+          <div className="card p-3 text-center">Closed: {closedCount}</div>
         </div>
       </div>
 
-      <Bar data={data} />
+      {/* 📊 Chart */}
+      <BarChart width={500} height={300} data={data}>
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis dataKey="name" />
+        <YAxis />
+        <Tooltip />
+        <Bar dataKey="value" />
+      </BarChart>
     </div>
   );
 }
