@@ -1,5 +1,6 @@
+
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "./api"; // 🔥 axios की जगह api use
 import {
   ResponsiveContainer,
   BarChart,
@@ -12,14 +13,15 @@ import {
 
 function Dashboard() {
   const [leads, setLeads] = useState([]);
-  const token = localStorage.getItem("token");
 
   const fetchLeads = async () => {
-    const res = await axios.get(
-      "https://real-estate-crm-backend-1onm.onrender.com/api/leads",
-      { headers: { Authorization: token } }
-    );
-    setLeads(res.data);
+    try {
+      const res = await api.get("/api/leads");
+      setLeads(res.data);
+    } catch (err) {
+      console.log(err);
+      alert("Failed to load data ❌");
+    }
   };
 
   useEffect(() => {
@@ -43,34 +45,51 @@ function Dashboard() {
     <div>
       <h2 className="mb-4">📊 Dashboard</h2>
 
-      {/* Cards */}
+      {/* 🔢 Cards */}
       <div className="row mb-4">
         <div className="col">
-          <div className="card p-3 text-center">Total: {total}</div>
+          <div className="card p-3 text-center">
+            <b>Total:</b> {total}
+          </div>
         </div>
+
         <div className="col">
-          <div className="card p-3 text-center">New: {newCount}</div>
+          <div className="card p-3 text-center">
+            <b>New:</b> {newCount}
+          </div>
         </div>
+
         <div className="col">
-          <div className="card p-3 text-center">Contacted: {contactedCount}</div>
+          <div className="card p-3 text-center">
+            <b>Contacted:</b> {contactedCount}
+          </div>
         </div>
+
         <div className="col">
-          <div className="card p-3 text-center">Closed: {closedCount}</div>
+          <div className="card p-3 text-center">
+            <b>Closed:</b> {closedCount}
+          </div>
         </div>
       </div>
 
       {/* 📊 Responsive Chart */}
-      <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={data} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
-          <YAxis allowDecimals={false} />
-          <Tooltip />
-          <Bar dataKey="value" minPointSize={5} />
-        </BarChart>
-      </ResponsiveContainer>
+      <div className="card p-3">
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart
+            data={data}
+            margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
+          >
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="name" />
+            <YAxis allowDecimals={false} />
+            <Tooltip />
+            <Bar dataKey="value" minPointSize={5} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 }
 
 export default Dashboard;
+

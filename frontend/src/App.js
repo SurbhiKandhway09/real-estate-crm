@@ -1,5 +1,6 @@
+
 import { useState, useEffect } from "react";
-import api from "./api";   // 🔥 axios हटाकर api use
+import api from "./api";
 import Login from "./Login";
 import Dashboard from "./Dashboard";
 
@@ -27,8 +28,14 @@ function App() {
     setLead({ ...lead, [e.target.name]: e.target.value });
   };
 
+  // ✅ FINAL CLEAN SUBMIT
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!lead.name || !lead.phone || !lead.source) {
+      alert("Please fill all required fields ❗");
+      return;
+    }
 
     try {
       if (editId) {
@@ -72,6 +79,7 @@ function App() {
   };
 
   const deleteLead = async (id) => {
+    if (!window.confirm("Are you sure?")) return;
     await api.delete(`/api/leads/delete/${id}`);
     fetchLeads();
   };
@@ -86,7 +94,7 @@ function App() {
 
   return (
     <div className="container mt-4">
-      
+
       {/* Buttons */}
       <button
         className="btn btn-danger mb-3"
@@ -158,7 +166,15 @@ function App() {
                   <td>{l.name}</td>
                   <td>{l.phone}</td>
                   <td>{l.source}</td>
-                  <td>{l.status}</td>
+                  <td>
+                    <span className={
+                      l.status === "New" ? "badge bg-primary" :
+                      l.status === "Contacted" ? "badge bg-warning text-dark" :
+                      "badge bg-success"
+                    }>
+                      {l.status}
+                    </span>
+                  </td>
                   <td>
                     <button className="btn btn-warning btn-sm me-2" onClick={() => handleEdit(l)}>
                       Edit
