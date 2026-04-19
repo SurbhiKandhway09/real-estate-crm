@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import api from "./api";
 import Login from "./Login";
 import Dashboard from "./Dashboard";
+import Layout from "./Layout";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(
@@ -28,7 +29,19 @@ function App() {
     setLead({ ...lead, [e.target.name]: e.target.value });
   };
 
-  // ✅ FINAL CLEAN SUBMIT
+  const fetchLeads = async () => {
+    try {
+      const res = await api.get("/api/leads");
+      setLeads(res.data);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  useEffect(() => {
+    if (isLoggedIn) fetchLeads();
+  }, [isLoggedIn]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -60,76 +73,45 @@ function App() {
       fetchLeads();
     } catch (err) {
       alert("Error ❌");
-      console.log(err);
     }
   };
 
-  const fetchLeads = async () => {
-    try {
-      const res = await api.get(`/api/leads`);
-      setLeads(res.data);
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  const handleEdit = (leadData) => {
-    setLead(leadData);
-    setEditId(leadData.id);
+  const handleEdit = (l) => {
+    setLead(l);
+    setEditId(l.id);
   };
 
   const deleteLead = async (id) => {
-    if (!window.confirm("Are you sure?")) return;
+    if (!window.confirm("Delete this lead?")) return;
     await api.delete(`/api/leads/delete/${id}`);
     fetchLeads();
   };
-
-  useEffect(() => {
-    if (isLoggedIn) fetchLeads();
-  }, [isLoggedIn]);
 
   if (!isLoggedIn) {
     return <Login setIsLoggedIn={setIsLoggedIn} />;
   }
 
   return (
-    <div className="container mt-4">
-
-      {/* Buttons */}
-      <button
-        className="btn btn-danger mb-3"
-        onClick={() => {
-          localStorage.removeItem("token");
-          setIsLoggedIn(false);
-        }}
-      >
-        Logout
-      </button>
-
-      <button
-        className="btn btn-info mb-3 ms-2"
-        onClick={() => setShowDashboard(!showDashboard)}
-      >
-        {showDashboard ? "Show CRM" : "Show Dashboard"}
-      </button>
+    <Layout setShowDashboard={setShowDashboard}>
 
       {showDashboard ? (
         <Dashboard />
       ) : (
         <>
-          <h2 className="text-center mb-4">🏡 Real Estate CRM</h2>
+          {/* FORM */}
+          <div className="bg-white p-4 rounded shadow mb-6">
+            <h3 className="text-lg font-semibold mb-3">
+              {editId ? "Edit Lead" : "Add Lead"}
+            </h3>
 
-          <div className="card p-3 mb-4">
-            <h4>{editId ? "Edit Lead" : "Add Lead"}</h4>
+            <form onSubmit={handleSubmit} className="space-y-2">
+              <input className="w-full p-2 border rounded" name="name" value={lead.name} placeholder="Name" onChange={handleChange} />
+              <input className="w-full p-2 border rounded" name="phone" value={lead.phone} placeholder="Phone" onChange={handleChange} />
+              <input className="w-full p-2 border rounded" name="email" value={lead.email} placeholder="Email" onChange={handleChange} />
+              <input className="w-full p-2 border rounded" name="budget" value={lead.budget} placeholder="Budget" onChange={handleChange} />
+              <input className="w-full p-2 border rounded" name="preference" value={lead.preference} placeholder="Preference" onChange={handleChange} />
 
-            <form onSubmit={handleSubmit} className="row g-2">
-              <input className="form-control" name="name" value={lead.name} placeholder="Name" onChange={handleChange} />
-              <input className="form-control" name="phone" value={lead.phone} placeholder="Phone" onChange={handleChange} />
-              <input className="form-control" name="email" value={lead.email} placeholder="Email" onChange={handleChange} />
-              <input className="form-control" name="budget" value={lead.budget} placeholder="Budget" onChange={handleChange} />
-              <input className="form-control" name="preference" value={lead.preference} placeholder="Preference" onChange={handleChange} />
-
-              <select className="form-select" name="source" value={lead.source} onChange={handleChange}>
+              <select className="w-full p-2 border rounded" name="source" value={lead.source} onChange={handleChange}>
                 <option value="">Select Source</option>
                 <option value="Instagram">Instagram</option>
                 <option value="Facebook">Facebook</option>
@@ -137,49 +119,49 @@ function App() {
                 <option value="Referral">Referral</option>
               </select>
 
-              <select className="form-select" name="status" value={lead.status} onChange={handleChange}>
+              <select className="w-full p-2 border rounded" name="status" value={lead.status} onChange={handleChange}>
                 <option value="New">New</option>
                 <option value="Contacted">Contacted</option>
                 <option value="Closed">Closed</option>
               </select>
 
-              <button className="btn btn-primary mt-2">
+              <button className="bg-blue-500 text-white px-4 py-2 rounded w-full">
                 {editId ? "Update Lead" : "Add Lead"}
               </button>
             </form>
           </div>
 
-          <table className="table table-bordered">
-            <thead>
+          {/* TABLE */}
+          <table className="w-full bg-white shadow rounded">
+            <thead className="bg-gray-200">
               <tr>
-                <th>Name</th>
-                <th>Phone</th>
-                <th>Source</th>
-                <th>Status</th>
-                <th>Actions</th>
+                <th className="p-2">Name</th>
+                <th className="p-2">Phone</th>
+                <th className="p-2">Source</th>
+                <th className="p-2">Status</th>
+                <th className="p-2">Actions</th>
               </tr>
             </thead>
 
             <tbody>
               {leads.map((l) => (
-                <tr key={l.id}>
-                  <td>{l.name}</td>
-                  <td>{l.phone}</td>
-                  <td>{l.source}</td>
-                  <td>
-                    <span className={
-                      l.status === "New" ? "badge bg-primary" :
-                      l.status === "Contacted" ? "badge bg-warning text-dark" :
-                      "badge bg-success"
-                    }>
-                      {l.status}
-                    </span>
-                  </td>
-                  <td>
-                    <button className="btn btn-warning btn-sm me-2" onClick={() => handleEdit(l)}>
+                <tr key={l.id} className="text-center border-t">
+                  <td className="p-2">{l.name}</td>
+                  <td className="p-2">{l.phone}</td>
+                  <td className="p-2">{l.source}</td>
+                  <td className="p-2">{l.status}</td>
+                  <td className="p-2 space-x-2">
+                    <button
+                      className="bg-yellow-400 px-2 py-1 rounded"
+                      onClick={() => handleEdit(l)}
+                    >
                       Edit
                     </button>
-                    <button className="btn btn-danger btn-sm" onClick={() => deleteLead(l.id)}>
+
+                    <button
+                      className="bg-red-500 text-white px-2 py-1 rounded"
+                      onClick={() => deleteLead(l.id)}
+                    >
                       Delete
                     </button>
                   </td>
@@ -189,8 +171,10 @@ function App() {
           </table>
         </>
       )}
-    </div>
+
+    </Layout>
   );
 }
 
 export default App;
+

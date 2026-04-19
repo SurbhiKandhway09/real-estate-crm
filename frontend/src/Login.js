@@ -3,12 +3,9 @@ import { useState } from "react";
 import api from "./api";
 
 function Login({ setIsLoggedIn }) {
-  const [form, setForm] = useState({
-    email: "",
-    password: ""
-  });
-
-  const [showPassword, setShowPassword] = useState(false);
+  const [form, setForm] = useState({ email: "", password: "" });
+  const [show, setShow] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -17,103 +14,91 @@ function Login({ setIsLoggedIn }) {
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    try {
-      const res = await api.post("/api/auth/login", form);
+    if (!form.email || !form.password) {
+      alert("Fill all fields ❗");
+      return;
+    }
 
+    try {
+      setLoading(true);
+      const res = await api.post("/api/auth/login", form);
       localStorage.setItem("token", res.data.token);
-      alert("Login successful ✅");
       setIsLoggedIn(true);
-    } catch (err) {
-      alert("Login failed ❌");
+    } catch {
+      alert("Invalid credentials ❌");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div
-      style={{
-        height: "100vh",
-        background: "linear-gradient(135deg, #667eea, #764ba2)",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center"
-      }}
-    >
-      <div
-        style={{
-          background: "#fff",
-          padding: "30px",
-          borderRadius: "12px",
-          width: "350px",
-          boxShadow: "0 10px 25px rgba(0,0,0,0.2)"
-        }}
-      >
-        <h2 style={{ textAlign: "center", marginBottom: "20px" }}>
-          🔐 Login
-        </h2>
+    <div className="min-h-screen flex">
 
-        <form onSubmit={handleLogin}>
-          <input
-            type="email"
-            name="email"
-            placeholder="Enter Email"
-            value={form.email}
-            onChange={handleChange}
-            required
-            style={inputStyle}
-          />
+      {/* LEFT SIDE (Branding) */}
+      <div className="hidden md:flex w-1/2 bg-gradient-to-br from-indigo-600 to-purple-700 text-white flex-col justify-center items-center p-10">
+        <h1 className="text-4xl font-bold mb-4">🏡 Real Estate CRM</h1>
+        <p className="text-lg opacity-80 text-center">
+          Manage your leads smarter, faster, and better.
+        </p>
+      </div>
 
-          <div style={{ position: "relative" }}>
+      {/* RIGHT SIDE (Login Card) */}
+      <div className="w-full md:w-1/2 flex items-center justify-center bg-gray-100">
+
+        <div className="bg-white p-8 rounded-2xl shadow-2xl w-80">
+
+          <h2 className="text-2xl font-bold text-center mb-6">
+            Welcome Back 👋
+          </h2>
+
+          <form onSubmit={handleLogin} className="space-y-4">
+
+            {/* Email */}
             <input
-              type={showPassword ? "text" : "password"}
-              name="password"
-              placeholder="Enter Password"
-              value={form.password}
+              type="email"
+              name="email"
+              placeholder="Email"
               onChange={handleChange}
-              required
-              style={inputStyle}
+              className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-indigo-400 outline-none"
             />
 
-            <span
-              onClick={() => setShowPassword(!showPassword)}
-              style={{
-                position: "absolute",
-                right: "10px",
-                top: "10px",
-                cursor: "pointer"
-              }}
-            >
-              👁️
-            </span>
-          </div>
+            {/* Password */}
+            <div className="relative">
+              <input
+                type={show ? "text" : "password"}
+                name="password"
+                placeholder="Password"
+                onChange={handleChange}
+                className="w-full p-2 border rounded-lg"
+              />
+              <span
+                onClick={() => setShow(!show)}
+                className="absolute right-3 top-2 cursor-pointer"
+              >
+                👁️
+              </span>
+            </div>
 
-          <button type="submit" style={buttonStyle}>
-            Login
-          </button>
-        </form>
+            {/* Button */}
+            <button
+              disabled={loading}
+              className="w-full bg-indigo-600 text-white p-2 rounded-lg hover:bg-indigo-700 transition"
+            >
+              {loading ? "Logging in..." : "Login"}
+            </button>
+
+          </form>
+
+          {/* Extra */}
+          <p className="text-sm text-center mt-4 text-gray-500">
+            Forgot password? <span className="text-indigo-600 cursor-pointer">Reset</span>
+          </p>
+
+        </div>
       </div>
     </div>
   );
 }
-
-const inputStyle = {
-  width: "100%",
-  padding: "10px",
-  marginBottom: "15px",
-  borderRadius: "8px",
-  border: "1px solid #ccc",
-  outline: "none"
-};
-
-const buttonStyle = {
-  width: "100%",
-  padding: "10px",
-  background: "#667eea",
-  color: "#fff",
-  border: "none",
-  borderRadius: "8px",
-  cursor: "pointer",
-  fontWeight: "bold"
-};
 
 export default Login;
 
