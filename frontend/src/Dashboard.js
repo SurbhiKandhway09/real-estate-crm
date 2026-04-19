@@ -16,7 +16,7 @@ function Dashboard() {
   const token = localStorage.getItem("token");
 
   const fetchLeads = async () => {
-    const res = await axios.get("http://localhost:5000/api/leads", {
+    const res = await axios.get("https://real-estate-crm-backend-1onm.onrender.com/api/leads", {
       headers: { Authorization: token }
     });
     setLeads(res.data);

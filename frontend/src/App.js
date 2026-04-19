@@ -34,7 +34,7 @@ function App() {
 
     if (editId) {
       await axios.put(
-        `http://localhost:5000/api/leads/update/${editId}`,
+        `https://real-estate-crm-backend-1onm.onrender.com/api/leads/update/${editId}`,
         lead,
         { headers: { Authorization: token } }
       );
@@ -42,7 +42,7 @@ function App() {
       setEditId(null);
     } else {
       await axios.post(
-        `http://localhost:5000/api/leads/add`,
+        `https://real-estate-crm-backend-1onm.onrender.com/api/leads/add`,
         lead,
         { headers: { Authorization: token } }
       );
@@ -64,7 +64,7 @@ function App() {
 
   const fetchLeads = async () => {
     const res = await axios.get(
-      `http://localhost:5000/api/leads`,
+      `https://real-estate-crm-backend-1onm.onrender.com/api/leads`,
       { headers: { Authorization: token } }
     );
     setLeads(res.data);
@@ -77,7 +77,7 @@ function App() {
 
   const deleteLead = async (id) => {
     await axios.delete(
-      `http://localhost:5000/api/leads/delete/${id}`,
+      `https://real-estate-crm-backend-1onm.onrender.com/api/leads/delete/${id}`,
       { headers: { Authorization: token } }
     );
     fetchLeads();
