@@ -163,6 +163,7 @@ function App() {
               <tr>
                 <th>Name</th>
                 <th>Phone</th>
+                 <th>Source</th>
                 <th>Status</th>
                 <th>Actions</th>
               </tr>
@@ -173,6 +174,7 @@ function App() {
                 <tr key={l.id}>
                   <td>{l.name}</td>
                   <td>{l.phone}</td>
+                  <td>{l.source}</td> 
                   <td>{l.status}</td>
                   <td>
                     <button
