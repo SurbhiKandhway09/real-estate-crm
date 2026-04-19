@@ -129,8 +129,8 @@ function App() {
               <input className="form-control" name="budget" value={lead.budget} placeholder="Budget" onChange={handleChange} />
               <input className="form-control" name="preference" value={lead.preference} placeholder="Preference" onChange={handleChange} />
               
-            <select
-  className="form-control"
+           <select
+  className="form-select"
   name="source"
   value={lead.source}
   onChange={handleChange}
