@@ -130,6 +130,17 @@ function App() {
               <input className="form-control" name="preference" value={lead.preference} placeholder="Preference" onChange={handleChange} />
               <input className="form-control" name="source" value={lead.source} placeholder="Source" onChange={handleChange} />
               <select
+  className="form-control"
+  name="source"
+  value={lead.source}
+  onChange={handleChange}
+>
+  <option value="Instagram">Instagram</option>
+  <option value="Facebook">Facebook</option>
+  <option value="Website">Website</option>
+  <option value="Referral">Referral</option>
+</select>
+              <select
   className="form-select"
   name="status"
   value={lead.status}
