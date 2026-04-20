@@ -1,18 +1,17 @@
 const mysql = require("mysql2");
 
 const db = mysql.createConnection({
-  host: "roundhouse.proxy.rlwy.net",
+  host: "localhost",
   user: "root",
-  password: "tFQIyyziddAyUBWXGfnQBBsQszpLyeJs",
-  database: "railway",
-  port: 41752
+  password: "",
+  database: "real_estate_crm",
 });
 
 db.connect((err) => {
   if (err) {
     console.log("DB Error ❌", err);
   } else {
-    console.log("Database connected successfully ✅");
+    console.log("DB Connected ✅");
   }
 });
 

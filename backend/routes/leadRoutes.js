@@ -1,73 +1,28 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../config/db");
-const verifyToken = require("../middleware/authMiddleware"); // ✅ TOP ME
+const verifyToken = require("../middleware/auth");
 
-// Test route
-router.get("/test", (req, res) => {
-  res.send("Route working ✅");
-});
-
-// GET ALL LEADS
+/* ===== GET LEADS (PROTECTED) ===== */
 router.get("/", verifyToken, (req, res) => {
-  const sql = "SELECT * FROM leads";
-
-  db.query(sql, (err, result) => {
-    if (err) {
-      return res.status(500).send(err);
-    }
+  db.query("SELECT * FROM leads", (err, result) => {
+    if (err) return res.status(500).json(err);
     res.json(result);
   });
 });
 
-// ADD LEAD
+/* ===== ADD LEAD ===== */
 router.post("/add", verifyToken, (req, res) => {
   const { name, phone, email, budget, preference, source, status } = req.body;
 
-  const sql = `
-    INSERT INTO leads (name, phone, email, budget, preference, source, status)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
-  `;
-
-  db.query(sql, [name, phone, email, budget, preference, source, status], (err, result) => {
-    if (err) {
-      return res.status(500).send(err);
+  db.query(
+    "INSERT INTO leads (name, phone, email, budget, preference, source, status) VALUES (?, ?, ?, ?, ?, ?, ?)",
+    [name, phone, email, budget, preference, source, status],
+    (err) => {
+      if (err) return res.status(500).json(err);
+      res.json({ message: "Lead added ✅" });
     }
-    res.send("Lead added successfully ✅");
-  });
-});
-
-// UPDATE LEAD
-router.put("/update/:id", verifyToken, (req, res) => {
-  const { id } = req.params;
-  const { name, phone, email, budget, preference, source, status } = req.body;
-
-  const sql = `
-    UPDATE leads 
-    SET name=?, phone=?, email=?, budget=?, preference=?, source=?, status=? 
-    WHERE id=?
-  `;
-
-  db.query(sql, [name, phone, email, budget, preference, source, status, id], (err, result) => {
-    if (err) {
-      return res.status(500).send(err);
-    }
-    res.send("Lead updated successfully ✅");
-  });
-});
-
-// DELETE LEAD
-router.delete("/delete/:id", verifyToken, (req, res) => {
-  const { id } = req.params;
-
-  const sql = "DELETE FROM leads WHERE id=?";
-
-  db.query(sql, [id], (err, result) => {
-    if (err) {
-      return res.status(500).send(err);
-    }
-    res.send("Lead deleted successfully 🗑️");
-  });
+  );
 });
 
 module.exports = router;
