@@ -1,51 +1,19 @@
 const express = require("express");
 const router = express.Router();
-const db = require("../config/db");
-const verifyToken = require("../middleware/auth");
-const checkRole = require("../middleware/role");
 
-// GET
-router.get("/", verifyToken, (req, res) => {
-  db.query("SELECT * FROM leads", (err, result) => {
-    if (err) return res.status(500).json(err);
-    res.json(result);
-  });
-});
+// ❌ REMOVE THIS LINE
+// const verifyToken = require("../middleware/auth");
 
-// ADD (admin)
-router.post("/add", verifyToken, checkRole("admin"), (req, res) => {
-  const { name, phone, email, budget, preference, source, status } = req.body;
+// ✅ TEMP: NO AUTH (FOR DEMO)
+router.get("/", (req, res) => {
+  const dummyLeads = [
+    { id: 1, name: "Aman", phone: "9999999999", status: "New" },
+    { id: 2, name: "Surbhi", phone: "6206697396", status: "New" },
+    { id: 3, name: "Shikha", phone: "9123485595", status: "Closed" },
+    { id: 4, name: "Sujeet", phone: "1144778855", status: "Contacted" }
+  ];
 
-  db.query(
-    "INSERT INTO leads (name, phone, email, budget, preference, source, status) VALUES (?, ?, ?, ?, ?, ?, ?)",
-    [name, phone, email, budget, preference, source, status],
-    (err) => {
-      if (err) return res.status(500).json(err);
-      res.json({ message: "Lead added ✅" });
-    }
-  );
-});
-
-// DELETE (admin)
-router.delete("/:id", verifyToken, checkRole("admin"), (req, res) => {
-  db.query("DELETE FROM leads WHERE id=?", [req.params.id], (err) => {
-    if (err) return res.status(500).json(err);
-    res.json({ message: "Deleted ✅" });
-  });
-});
-
-// UPDATE (admin)
-router.put("/:id", verifyToken, checkRole("admin"), (req, res) => {
-  const { name, phone, status } = req.body;
-
-  db.query(
-    "UPDATE leads SET name=?, phone=?, status=? WHERE id=?",
-    [name, phone, status, req.params.id],
-    (err) => {
-      if (err) return res.status(500).json(err);
-      res.json({ message: "Updated ✅" });
-    }
-  );
+  res.json(dummyLeads);
 });
 
 module.exports = router;
