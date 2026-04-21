@@ -20,7 +20,13 @@ function Leads() {
       const res = await API.get("/api/leads");
       setLeads(res.data);
     } catch {
-      setLeads([]); // fallback
+      // fallback dummy data
+      setLeads([
+        { id: 1, name: "Aman", phone: "9999999999", status: "New" },
+        { id: 2, name: "Surbhi", phone: "6206697396", status: "New" },
+        { id: 3, name: "Shikha", phone: "9123485595", status: "Closed" },
+        { id: 4, name: "Sujeet", phone: "1144778855", status: "Contacted" }
+      ]);
     }
   };
 
@@ -44,7 +50,7 @@ function Leads() {
     setLeads(leads.filter((l) => l.id !== id));
   };
 
-  // ✅ EDIT START
+  // ✅ EDIT
   const handleEdit = (lead) => {
     setForm({
       name: lead.name,
@@ -149,7 +155,7 @@ function Leads() {
                   </span>
                 </td>
 
-                {/* 🔥 ACTIONS */}
+                {/* 🔥 ACTIONS FIXED */}
                 <td className="space-x-2">
                   <button
                     onClick={() => handleEdit(l)}
