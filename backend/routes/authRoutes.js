@@ -1,32 +1,23 @@
 const express = require("express");
 const router = express.Router();
-const db = require("../config/db");
 const jwt = require("jsonwebtoken");
 
+// 🔐 LOGIN (NO DATABASE - TEMP FIX)
 router.post("/login", (req, res) => {
   const { email, password } = req.body;
 
-  db.query(
-    "SELECT * FROM users WHERE email=? AND password=?",
-    [email, password],
-    (err, result) => {
-      if (err) return res.status(500).json(err);
+  // ✅ DEMO LOGIN
+  if (email === "test@gmail.com" && password === "123456") {
+    const token = jwt.sign(
+      { id: 1, role: "admin" },
+      "secret123",
+      { expiresIn: "1d" }
+    );
 
-      if (result.length > 0) {
-        const user = result[0];
+    return res.json({ token });
+  }
 
-        const token = jwt.sign(
-          { id: user.id, role: user.role },
-          "secret123",
-          { expiresIn: "1d" }
-        );
-
-        res.json({ token, role: user.role });
-      } else {
-        res.status(401).json({ message: "Invalid credentials ❌" });
-      }
-    }
-  );
+  return res.status(401).json({ message: "Invalid credentials ❌" });
 });
 
 module.exports = router;
