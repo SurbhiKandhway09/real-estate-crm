@@ -19,40 +19,46 @@ function Leads() {
     fetchLeads();
   }, []);
 
+  // ✅ FETCH
   const fetchLeads = async () => {
     try {
       const res = await API.get("/api/leads");
       setLeads(res.data);
-    } catch {
-      setLeads([]);
+    } catch (err) {
+      console.log("Fetch error:", err);
     }
   };
 
   // ✅ ADD
-  const handleAdd = (e) => {
-    e.preventDefault();
+  const handleAdd = async (e) => {
+    e.preventDefault(); // 🔥 VERY IMPORTANT
 
-    const newLead = {
-      id: Date.now(),
-      ...form
-    };
+    try {
+      await API.post("/api/leads", form);
+      await fetchLeads(); // ensure updated data
 
-    setLeads([...leads, newLead]);
-
-    setForm({
-      name: "",
-      email: "",
-      phone: "",
-      budget: "",
-      preference: "",
-      source: "Website",
-      status: "New"
-    });
+      setForm({
+        name: "",
+        email: "",
+        phone: "",
+        budget: "",
+        preference: "",
+        source: "Website",
+        status: "New"
+      });
+    } catch (err) {
+      console.log("Add error:", err);
+    }
   };
 
   // ✅ DELETE
-  const handleDelete = (id) => {
-    setLeads(leads.filter((l) => l.id !== id));
+  const handleDelete = async (id) => {
+    try {
+      await API.delete(`/api/leads/${id}`);
+      await fetchLeads();
+    } catch (err) {
+      console.log("Delete error:", err);
+    }
   };
 
   // ✅ EDIT
@@ -62,31 +68,32 @@ function Leads() {
   };
 
   // ✅ UPDATE
-  const handleUpdate = (e) => {
-    e.preventDefault();
+  const handleUpdate = async (e) => {
+    e.preventDefault(); // 🔥 IMPORTANT
 
-    const updated = leads.map((l) =>
-      l.id === editId ? { ...form, id: editId } : l
-    );
+    try {
+      await API.put(`/api/leads/${editId}`, form);
+      await fetchLeads();
+      setEditId(null);
 
-    setLeads(updated);
-    setEditId(null);
-
-    setForm({
-      name: "",
-      email: "",
-      phone: "",
-      budget: "",
-      preference: "",
-      source: "Website",
-      status: "New"
-    });
+      setForm({
+        name: "",
+        email: "",
+        phone: "",
+        budget: "",
+        preference: "",
+        source: "Website",
+        status: "New"
+      });
+    } catch (err) {
+      console.log("Update error:", err);
+    }
   };
 
   return (
     <div className="p-6">
 
-      {/* 🔥 FORM */}
+      {/* FORM */}
       <div className="bg-white p-5 rounded shadow mb-6">
         <h2 className="text-lg font-bold mb-4">
           {editId ? "Edit Lead" : "Add Lead"}
@@ -96,57 +103,34 @@ function Leads() {
           onSubmit={editId ? handleUpdate : handleAdd}
           className="grid grid-cols-2 gap-4"
         >
-          <input
-            placeholder="Name"
-            className="border p-2 rounded"
+          <input placeholder="Name" className="border p-2 rounded"
             value={form.name}
-            onChange={(e) =>
-              setForm({ ...form, name: e.target.value })
-            }
+            onChange={(e)=>setForm({...form,name:e.target.value})}
           />
 
-          <input
-            placeholder="Phone"
-            className="border p-2 rounded"
+          <input placeholder="Phone" className="border p-2 rounded"
             value={form.phone}
-            onChange={(e) =>
-              setForm({ ...form, phone: e.target.value })
-            }
+            onChange={(e)=>setForm({...form,phone:e.target.value})}
           />
 
-          <input
-            placeholder="Email"
-            className="border p-2 rounded"
+          <input placeholder="Email" className="border p-2 rounded"
             value={form.email}
-            onChange={(e) =>
-              setForm({ ...form, email: e.target.value })
-            }
+            onChange={(e)=>setForm({...form,email:e.target.value})}
           />
 
-          <input
-            placeholder="Budget"
-            className="border p-2 rounded"
+          <input placeholder="Budget" className="border p-2 rounded"
             value={form.budget}
-            onChange={(e) =>
-              setForm({ ...form, budget: e.target.value })
-            }
+            onChange={(e)=>setForm({...form,budget:e.target.value})}
           />
 
-          <input
-            placeholder="Preference"
-            className="border p-2 rounded"
+          <input placeholder="Preference" className="border p-2 rounded"
             value={form.preference}
-            onChange={(e) =>
-              setForm({ ...form, preference: e.target.value })
-            }
+            onChange={(e)=>setForm({...form,preference:e.target.value})}
           />
 
-          <select
-            className="border p-2 rounded"
+          <select className="border p-2 rounded"
             value={form.source}
-            onChange={(e) =>
-              setForm({ ...form, source: e.target.value })
-            }
+            onChange={(e)=>setForm({...form,source:e.target.value})}
           >
             <option>Website</option>
             <option>Facebook</option>
@@ -154,12 +138,9 @@ function Leads() {
             <option>Referral</option>
           </select>
 
-          <select
-            className="border p-2 rounded"
+          <select className="border p-2 rounded"
             value={form.status}
-            onChange={(e) =>
-              setForm({ ...form, status: e.target.value })
-            }
+            onChange={(e)=>setForm({...form,status:e.target.value})}
           >
             <option>New</option>
             <option>Contacted</option>
@@ -172,7 +153,7 @@ function Leads() {
         </form>
       </div>
 
-      {/* 📊 TABLE */}
+      {/* TABLE */}
       <div className="bg-white p-4 rounded shadow overflow-x-auto">
         <table className="w-full text-left">
           <thead>
@@ -195,34 +176,24 @@ function Leads() {
                 <td>{l.budget}</td>
 
                 <td>
-                  <span
-                    className={`px-2 py-1 rounded text-white text-sm ${
-                      l.status === "New"
-                        ? "bg-blue-500"
-                        : l.status === "Contacted"
-                        ? "bg-yellow-500"
-                        : "bg-green-500"
-                    }`}
-                  >
+                  <span className={`px-2 py-1 rounded text-white text-sm ${
+                    l.status==="New" ? "bg-blue-500"
+                    : l.status==="Contacted" ? "bg-yellow-500"
+                    : "bg-green-500"
+                  }`}>
                     {l.status}
                   </span>
                 </td>
 
                 <td className="space-x-2">
-                  <button
-                    onClick={() => handleEdit(l)}
-                    className="text-blue-600"
-                  >
+                  <button onClick={()=>handleEdit(l)} className="text-blue-600">
                     Edit
                   </button>
-
-                  <button
-                    onClick={() => handleDelete(l.id)}
-                    className="text-red-600"
-                  >
+                  <button onClick={()=>handleDelete(l.id)} className="text-red-600">
                     Delete
                   </button>
                 </td>
+
               </tr>
             ))}
           </tbody>
