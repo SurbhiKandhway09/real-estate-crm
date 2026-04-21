@@ -1,104 +1,48 @@
-
 import { useState } from "react";
-import api from "./api";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
-function Login({ setIsLoggedIn }) {
+function Login() {
+  const navigate = useNavigate();
+
   const [form, setForm] = useState({ email: "", password: "" });
-  const [show, setShow] = useState(false);
-  const [loading, setLoading] = useState(false);
-
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    if (!form.email || !form.password) {
-      alert("Fill all fields ❗");
-      return;
-    }
-
     try {
-      setLoading(true);
-      const res = await api.post("/api/auth/login", form);
+      const res = await axios.post(
+        "http://localhost:5000/api/auth/login",
+        form
+      );
+
       localStorage.setItem("token", res.data.token);
-      setIsLoggedIn(true);
+      localStorage.setItem("role", res.data.role);
+
+      navigate("/dashboard");
+
     } catch {
-      alert("Invalid credentials ❌");
-    } finally {
-      setLoading(false);
+      alert("Login failed ❌");
     }
   };
 
   return (
-    <div className="min-h-screen flex">
+    <div className="h-screen flex items-center justify-center bg-indigo-600">
+      <form onSubmit={handleLogin} className="bg-white p-6 rounded shadow w-80">
+        <h2 className="text-xl font-bold mb-3">Login</h2>
 
-      {/* LEFT SIDE (Branding) */}
-      <div className="hidden md:flex w-1/2 bg-gradient-to-br from-indigo-600 to-purple-700 text-white flex-col justify-center items-center p-10">
-        <h1 className="text-4xl font-bold mb-4">🏡 Real Estate CRM</h1>
-        <p className="text-lg opacity-80 text-center">
-          Manage your leads smarter, faster, and better.
-        </p>
-      </div>
+        <input placeholder="Email" className="p-2 border w-full mb-2"
+          onChange={(e)=>setForm({...form,email:e.target.value})}/>
 
-      {/* RIGHT SIDE (Login Card) */}
-      <div className="w-full md:w-1/2 flex items-center justify-center bg-gray-100">
+        <input type="password" placeholder="Password" className="p-2 border w-full mb-2"
+          onChange={(e)=>setForm({...form,password:e.target.value})}/>
 
-        <div className="bg-white p-8 rounded-2xl shadow-2xl w-80">
-
-          <h2 className="text-2xl font-bold text-center mb-6">
-            Welcome Back 👋
-          </h2>
-
-          <form onSubmit={handleLogin} className="space-y-4">
-
-            {/* Email */}
-            <input
-              type="email"
-              name="email"
-              placeholder="Email"
-              onChange={handleChange}
-              className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-indigo-400 outline-none"
-            />
-
-            {/* Password */}
-            <div className="relative">
-              <input
-                type={show ? "text" : "password"}
-                name="password"
-                placeholder="Password"
-                onChange={handleChange}
-                className="w-full p-2 border rounded-lg"
-              />
-              <span
-                onClick={() => setShow(!show)}
-                className="absolute right-3 top-2 cursor-pointer"
-              >
-                👁️
-              </span>
-            </div>
-
-            {/* Button */}
-            <button
-              disabled={loading}
-              className="w-full bg-indigo-600 text-white p-2 rounded-lg hover:bg-indigo-700 transition"
-            >
-              {loading ? "Logging in..." : "Login"}
-            </button>
-
-          </form>
-
-          {/* Extra */}
-          <p className="text-sm text-center mt-4 text-gray-500">
-            Forgot password? <span className="text-indigo-600 cursor-pointer">Reset</span>
-          </p>
-
-        </div>
-      </div>
+        <button className="bg-indigo-600 text-white w-full py-2 rounded">
+          Login
+        </button>
+      </form>
     </div>
   );
 }
 
 export default Login;
-

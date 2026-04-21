@@ -1,95 +1,50 @@
-
 import { useEffect, useState } from "react";
-import api from "./api"; // 🔥 axios की जगह api use
-import {
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  CartesianGrid
-} from "recharts";
+import api from "./api";
 
 function Dashboard() {
   const [leads, setLeads] = useState([]);
 
-  const fetchLeads = async () => {
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
     try {
       const res = await api.get("/api/leads");
       setLeads(res.data);
-    } catch (err) {
-      console.log(err);
-      alert("Failed to load data ❌");
+    } catch {
+      console.log("Error fetching data");
     }
   };
 
-  useEffect(() => {
-    fetchLeads();
-  }, []);
-
-  // 🎯 counts
   const total = leads.length;
-  const newCount = leads.filter(l => l.status === "New").length;
-  const contactedCount = leads.filter(l => l.status === "Contacted").length;
-  const closedCount = leads.filter(l => l.status === "Closed").length;
-
-  // 📊 chart data
-  const data = [
-    { name: "New", value: newCount },
-    { name: "Contacted", value: contactedCount },
-    { name: "Closed", value: closedCount }
-  ];
+  const newLeads = leads.filter(l => l.status === "New").length;
+  const closed = leads.filter(l => l.status === "Closed").length;
 
   return (
     <div>
-      <h2 className="mb-4">📊 Dashboard</h2>
+      <h2 className="text-2xl font-bold mb-6">Dashboard</h2>
 
-      {/* 🔢 Cards */}
-      <div className="row mb-4">
-        <div className="col">
-          <div className="card p-3 text-center">
-            <b>Total:</b> {total}
-          </div>
+      <div className="grid md:grid-cols-3 gap-6">
+
+        <div className="bg-white p-5 rounded-xl shadow hover:shadow-lg transition">
+          <p className="text-gray-500">Total Leads</p>
+          <h2 className="text-2xl font-bold">{total}</h2>
         </div>
 
-        <div className="col">
-          <div className="card p-3 text-center">
-            <b>New:</b> {newCount}
-          </div>
+        <div className="bg-blue-500 text-white p-5 rounded-xl shadow hover:shadow-lg transition">
+          <p>New Leads</p>
+          <h2 className="text-2xl font-bold">{newLeads}</h2>
         </div>
 
-        <div className="col">
-          <div className="card p-3 text-center">
-            <b>Contacted:</b> {contactedCount}
-          </div>
+        <div className="bg-green-500 text-white p-5 rounded-xl shadow hover:shadow-lg transition">
+          <p>Closed Deals</p>
+          <h2 className="text-2xl font-bold">{closed}</h2>
         </div>
 
-        <div className="col">
-          <div className="card p-3 text-center">
-            <b>Closed:</b> {closedCount}
-          </div>
-        </div>
-      </div>
-
-      {/* 📊 Responsive Chart */}
-      <div className="card p-3">
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart
-            data={data}
-            margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
-          >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis allowDecimals={false} />
-            <Tooltip />
-            <Bar dataKey="value" minPointSize={5} />
-          </BarChart>
-        </ResponsiveContainer>
       </div>
     </div>
   );
 }
 
 export default Dashboard;
-
