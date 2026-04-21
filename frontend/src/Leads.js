@@ -3,13 +3,17 @@ import API from "./api";
 
 function Leads() {
   const [leads, setLeads] = useState([]);
+  const [editId, setEditId] = useState(null);
+
   const [form, setForm] = useState({
     name: "",
+    email: "",
     phone: "",
+    budget: "",
+    preference: "",
+    source: "Website",
     status: "New"
   });
-
-  const [editId, setEditId] = useState(null);
 
   useEffect(() => {
     fetchLeads();
@@ -20,13 +24,7 @@ function Leads() {
       const res = await API.get("/api/leads");
       setLeads(res.data);
     } catch {
-      // fallback dummy data
-      setLeads([
-        { id: 1, name: "Aman", phone: "9999999999", status: "New" },
-        { id: 2, name: "Surbhi", phone: "6206697396", status: "New" },
-        { id: 3, name: "Shikha", phone: "9123485595", status: "Closed" },
-        { id: 4, name: "Sujeet", phone: "1144778855", status: "Contacted" }
-      ]);
+      setLeads([]);
     }
   };
 
@@ -34,15 +32,22 @@ function Leads() {
   const handleAdd = (e) => {
     e.preventDefault();
 
-    if (!form.name || !form.phone) return;
-
     const newLead = {
       id: Date.now(),
       ...form
     };
 
     setLeads([...leads, newLead]);
-    setForm({ name: "", phone: "", status: "New" });
+
+    setForm({
+      name: "",
+      email: "",
+      phone: "",
+      budget: "",
+      preference: "",
+      source: "Website",
+      status: "New"
+    });
   };
 
   // ✅ DELETE
@@ -52,11 +57,7 @@ function Leads() {
 
   // ✅ EDIT
   const handleEdit = (lead) => {
-    setForm({
-      name: lead.name,
-      phone: lead.phone,
-      status: lead.status
-    });
+    setForm(lead);
     setEditId(lead.id);
   };
 
@@ -65,29 +66,37 @@ function Leads() {
     e.preventDefault();
 
     const updated = leads.map((l) =>
-      l.id === editId ? { ...l, ...form } : l
+      l.id === editId ? { ...form, id: editId } : l
     );
 
     setLeads(updated);
     setEditId(null);
-    setForm({ name: "", phone: "", status: "New" });
+
+    setForm({
+      name: "",
+      email: "",
+      phone: "",
+      budget: "",
+      preference: "",
+      source: "Website",
+      status: "New"
+    });
   };
 
   return (
     <div className="p-6">
 
-      {/* 🔥 ADD / EDIT FORM */}
-      <div className="bg-white p-4 rounded shadow mb-6">
-        <h2 className="text-lg font-bold mb-3">
+      {/* 🔥 FORM */}
+      <div className="bg-white p-5 rounded shadow mb-6">
+        <h2 className="text-lg font-bold mb-4">
           {editId ? "Edit Lead" : "Add Lead"}
         </h2>
 
         <form
           onSubmit={editId ? handleUpdate : handleAdd}
-          className="grid grid-cols-3 gap-3"
+          className="grid grid-cols-2 gap-4"
         >
           <input
-            type="text"
             placeholder="Name"
             className="border p-2 rounded"
             value={form.name}
@@ -97,7 +106,6 @@ function Leads() {
           />
 
           <input
-            type="text"
             placeholder="Phone"
             className="border p-2 rounded"
             value={form.phone}
@@ -105,6 +113,46 @@ function Leads() {
               setForm({ ...form, phone: e.target.value })
             }
           />
+
+          <input
+            placeholder="Email"
+            className="border p-2 rounded"
+            value={form.email}
+            onChange={(e) =>
+              setForm({ ...form, email: e.target.value })
+            }
+          />
+
+          <input
+            placeholder="Budget"
+            className="border p-2 rounded"
+            value={form.budget}
+            onChange={(e) =>
+              setForm({ ...form, budget: e.target.value })
+            }
+          />
+
+          <input
+            placeholder="Preference"
+            className="border p-2 rounded"
+            value={form.preference}
+            onChange={(e) =>
+              setForm({ ...form, preference: e.target.value })
+            }
+          />
+
+          <select
+            className="border p-2 rounded"
+            value={form.source}
+            onChange={(e) =>
+              setForm({ ...form, source: e.target.value })
+            }
+          >
+            <option>Website</option>
+            <option>Facebook</option>
+            <option>Call</option>
+            <option>Referral</option>
+          </select>
 
           <select
             className="border p-2 rounded"
@@ -118,19 +166,21 @@ function Leads() {
             <option>Closed</option>
           </select>
 
-          <button className="col-span-3 bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700">
+          <button className="col-span-2 bg-indigo-600 text-white py-2 rounded">
             {editId ? "Update Lead" : "Add Lead"}
           </button>
         </form>
       </div>
 
       {/* 📊 TABLE */}
-      <div className="bg-white p-4 rounded shadow">
+      <div className="bg-white p-4 rounded shadow overflow-x-auto">
         <table className="w-full text-left">
           <thead>
             <tr className="border-b font-bold">
               <th>Name</th>
+              <th>Email</th>
               <th>Phone</th>
+              <th>Budget</th>
               <th>Status</th>
               <th>Actions</th>
             </tr>
@@ -140,7 +190,10 @@ function Leads() {
             {leads.map((l) => (
               <tr key={l.id} className="border-b">
                 <td>{l.name}</td>
+                <td>{l.email}</td>
                 <td>{l.phone}</td>
+                <td>{l.budget}</td>
+
                 <td>
                   <span
                     className={`px-2 py-1 rounded text-white text-sm ${
@@ -155,7 +208,6 @@ function Leads() {
                   </span>
                 </td>
 
-                {/* 🔥 ACTIONS FIXED */}
                 <td className="space-x-2">
                   <button
                     onClick={() => handleEdit(l)}
